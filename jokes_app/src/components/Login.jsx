@@ -7,6 +7,7 @@ export default function Login(props) {
 	const passwordRef = useRef();
 
 	let history = useHistory();
+	const [error, setError] = React.useState("");
 
 	const submit = () => {
 		axios
@@ -15,16 +16,17 @@ export default function Login(props) {
 				password: passwordRef.current.value
 			})
 			.then(res => {
-				// SUCCESS! Credentials are valid:
-				//   1- Put the token string in local storage under a 'token' key
-				localStorage.setItem("token", res.data.token);
-				// localStorage.setItem('token', JSON.stringify(myArray));
-				//   2- Redirect users to the /quotes route
-				history.push("/jokes");
+				if (!res.data.token) {
+					setError(res.data.message);
+				} else {
+					localStorage.setItem("token", res.data.token);
+					history.push("/jokes");
+				}
 			})
 			.catch(error => {
 				// Alert a sensible message pulled from the error object
 				// alert(error.message);
+				setError(error.message);
 			});
 	};
 
@@ -40,6 +42,15 @@ export default function Login(props) {
 			<div>
 				<button onClick={submit}>Submit</button>
 			</div>
+
+			<br />
+			{error ? (
+				<>
+					<div style={{ color: "red" }}>{error}</div>
+				</>
+			) : (
+				""
+			)}
 		</div>
 	);
 }
